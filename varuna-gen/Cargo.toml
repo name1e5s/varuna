@@ -9,3 +9,5 @@ edition = "2021"
 serde = { version = "1.0", features = ["derive"] }
 toml = "0.5"
 anyhow = "1.0"
+minijinja = { version = "0.12", features = ["source"] }
+rand = "0.8"

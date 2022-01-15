@@ -119,7 +119,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_config() {
-        let config = Config::from_file("example.toml").unwrap();
+        let config = Config::from_file("example-package/example.toml").unwrap();
         let mut args = HashMap::new();
         args.insert(
             "id".to_string(),
