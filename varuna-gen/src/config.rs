@@ -3,7 +3,7 @@ use serde::{
     de::{self, MapAccess, Visitor},
     Deserialize, Deserializer, Serialize,
 };
-use std::{collections::HashMap, env::current_dir, fmt, fmt::Debug};
+use std::{collections::HashMap, env::current_dir, fmt, fmt::Debug, path::Path};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq)]
 pub struct Package {
@@ -97,16 +97,16 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn from_file(path: &str) -> Result<Self> {
-        let file = std::fs::read_to_string(path).with_context(|| {
+    pub fn from_file(path: impl AsRef<Path>) -> Result<Self> {
+        let file = std::fs::read_to_string(path.as_ref()).with_context(|| {
             format!(
-                "failed to read file: {}, pwd: {:?}",
-                path,
+                "failed to read file: {:?}, pwd: {:?}",
+                path.as_ref(),
                 current_dir().unwrap_or_default()
             )
         })?;
         let config: Config = toml::from_str(&file)
-            .with_context(|| format!("failed to parse config file: {}", path))?;
+            .with_context(|| format!("failed to parse config file: {:?}", path.as_ref()))?;
         Ok(config)
     }
 }
@@ -119,7 +119,7 @@ mod tests {
 
     #[test]
     fn test_deserialize_config() {
-        let config = Config::from_file("example-package/example.toml").unwrap();
+        let config = Config::from_file("example-package/package.toml").unwrap();
         let mut args = HashMap::new();
         args.insert(
             "id".to_string(),

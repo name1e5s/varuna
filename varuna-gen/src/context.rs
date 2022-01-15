@@ -5,7 +5,7 @@ use std::{collections::BTreeMap, fs::read_dir, path::Path};
 
 type Choice = BTreeMap<String, String>;
 
-pub fn set_pre_compile_context(
+pub fn set_pre_render_context(
     template_dir: &Path,
     context: &mut BTreeMap<String, String>,
 ) -> Result<Choice> {
@@ -103,12 +103,12 @@ mod tests {
 
     use super::*;
     #[test]
-    fn test_pre_compile_context() {
+    fn test_pre_render_context() {
         let mut context = BTreeMap::new();
         context.insert("id".to_string(), "114514".to_string());
         context.insert("serial".to_string(), "1919810".to_string());
         let choice =
-            set_pre_compile_context(Path::new("example-package/template"), &mut context).unwrap();
+            set_pre_render_context(Path::new("example-package/template"), &mut context).unwrap();
         assert_eq!(context["id"], "114514");
         assert_eq!(context["serial"], "1919810");
         assert_eq!(context["hello"], "114514:1919810");
