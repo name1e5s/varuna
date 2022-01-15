@@ -1,0 +1,8 @@
+[package]
+name = "example-lab"
+version = "1.14.514"
+description = "This is an example lab"
+
+[args]
+id = "student id"
+serial = { description = "serial number", default = "1919810" }
