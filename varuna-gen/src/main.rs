@@ -1,3 +1,4 @@
+use minijinja::Environment;
 use std::{collections::BTreeMap, env};
 use varuna_gen::gen_target;
 fn main() {
@@ -5,7 +6,7 @@ fn main() {
     let target_id = args
         .get("target_id")
         .map(|s| s.parse::<usize>().expect("failed to parse target_id"));
-    gen_target("./", args, target_id).unwrap();
+    gen_target("./", args, target_id, &Environment::new).unwrap();
 }
 
 fn get_args() -> BTreeMap<String, String> {

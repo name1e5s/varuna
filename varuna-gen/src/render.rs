@@ -1,7 +1,12 @@
 use anyhow::{Context, Result};
 use minijinja::Environment;
 use std::{collections::BTreeMap, path::Path};
-pub fn render(source: &Path, target: &Path, context: &BTreeMap<String, String>) -> Result<()> {
+pub fn render<'a>(
+    source: &Path,
+    target: &Path,
+    context: &BTreeMap<String, String>,
+    env_gen: &dyn Fn() -> Environment<'a>,
+) -> Result<()> {
     if !target.exists() {
         std::fs::create_dir_all(target)
             .with_context(|| format!("failed to create target directory: {}", target.display()))?;
@@ -10,7 +15,7 @@ pub fn render(source: &Path, target: &Path, context: &BTreeMap<String, String>) 
         let entry = entry?;
         let path = entry.path();
         if path.is_file() {
-            let mut env = Environment::new();
+            let mut env = env_gen();
             let name = path
                 .file_name()
                 .with_context(|| format!("failed to get file name: {}", path.display()))?
@@ -39,7 +44,7 @@ pub fn render(source: &Path, target: &Path, context: &BTreeMap<String, String>) 
                     )
                 })?;
             }
-            render(&path, &target_path, context)?;
+            render(&path, &target_path, context, env_gen)?;
         } else {
             anyhow::bail!("unexpected file type: {}", path.display());
         }

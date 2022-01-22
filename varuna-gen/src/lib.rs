@@ -1,6 +1,7 @@
 #![feature(path_file_prefix)]
 
 use anyhow::{Context, Result};
+use minijinja::Environment;
 use std::{
     collections::BTreeMap,
     path::{Path, PathBuf},
@@ -10,10 +11,11 @@ pub mod config;
 pub mod context;
 pub mod render;
 
-pub fn gen_target(
+pub fn gen_target<'a>(
     package: impl AsRef<Path>,
     args: BTreeMap<String, String>,
     target_id: Option<usize>,
+    env_gen: &dyn Fn() -> Environment<'a>,
 ) -> Result<()> {
     let package = package.as_ref();
     let config = config::Config::from_file(&package.join("package.toml")).with_context(|| {
@@ -32,12 +34,12 @@ pub fn gen_target(
     )?;
     let template = package.join(&config.package.template);
 
-    let choice = context::set_pre_render_context(&template, &mut context)?;
+    let choice = context::set_pre_render_context(&template, &mut context, env_gen)?;
     let choice = toml::to_string_pretty(&choice)
         .with_context(|| format!("failed to convert choice to string: {}", template.display()))?;
     std::fs::write(&target.join("choice.toml"), choice)
         .with_context(|| format!("failed to write file: {}", target.display()))?;
-    render::render(&source, &target, &context)?;
+    render::render(&source, &target, &context, env_gen)?;
     Ok(())
 }
 

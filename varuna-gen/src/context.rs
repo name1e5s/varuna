@@ -5,11 +5,12 @@ use std::{collections::BTreeMap, fs::read_dir, path::Path};
 
 type Choice = BTreeMap<String, String>;
 
-pub fn set_pre_render_context(
+pub fn set_pre_render_context<'a>(
     template_dir: &Path,
     context: &mut BTreeMap<String, String>,
+    env_gen: &dyn Fn() -> Environment<'a>,
 ) -> Result<Choice> {
-    let mut env = Environment::new();
+    let mut env = env_gen();
     let files = read_dir(template_dir).with_context(|| {
         format!(
             "failed to read template directory: {}",
@@ -107,8 +108,12 @@ mod tests {
         let mut context = BTreeMap::new();
         context.insert("id".to_string(), "114514".to_string());
         context.insert("serial".to_string(), "1919810".to_string());
-        let choice =
-            set_pre_render_context(Path::new("example-package/template"), &mut context).unwrap();
+        let choice = set_pre_render_context(
+            Path::new("example-package/template"),
+            &mut context,
+            &Environment::new,
+        )
+        .unwrap();
         assert_eq!(context["id"], "114514");
         assert_eq!(context["serial"], "1919810");
         assert_eq!(context["hello"], "114514:1919810");
